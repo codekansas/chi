@@ -1,18 +1,16 @@
 import { journey } from "../data/journey";
 import { useGameStore } from "../store/gameStore";
 
-type HudProps = {
-  statsVisible: boolean;
-  onToggleStats: () => void;
-};
-
-export const HUD = ({ statsVisible, onToggleStats }: HudProps) => {
+export const HUD = () => {
   const { activeSceneId, setScene, flags, canTravel } = useGameStore();
   const scene = journey.find((j) => j.id === activeSceneId);
   if (!scene) return null;
 
   const travelUnlocked = canTravel(scene.id);
   const nextScene = journey.find((j) => j.id === scene.travelTo);
+  const unlocked = Object.keys(flags).length;
+  const required = scene.travelRequires ?? [];
+  const pending = required.filter((r) => !flags[r]);
 
   return (
     <div className="hud">
@@ -24,18 +22,14 @@ export const HUD = ({ statsVisible, onToggleStats }: HudProps) => {
       </div>
       <p>{scene.introText}</p>
       <p className="hud-progress">
-        Memories unlocked: {Object.keys(flags).length} · Required to travel:{" "}
-        {(scene.travelRequires ?? []).join(", ") || "none"}
+        Memories unlocked: {unlocked} · Required to travel: {pending.length === 0 ? "none" : pending.join(", ")}
       </p>
       {scene.travelTo && (
         <button className="hud-button" disabled={!travelUnlocked} onClick={() => setScene(scene.travelTo!)}>
           {travelUnlocked ? `Travel to ${nextScene?.title ?? scene.travelTo}` : "Complete memories to travel"}
         </button>
       )}
-      <button className="hud-link" type="button" onClick={onToggleStats}>
-        {statsVisible ? "Hide stats" : "Show stats"}
-      </button>
-      <div className="hud-controls">Controls: W/A/S/D roll · Gravity bounce; press F near memories to interact</div>
+      <div className="hud-controls">Controls: A/D to roll · Bounce onto memories to trigger them · Reach the line gate to finish</div>
     </div>
   );
 };

@@ -1,180 +1,198 @@
-export type Landmark = {
+export type MemoryBox = {
   id: string;
   label: string;
-  pos_w3: [number, number, number];
-  model?: string;
-  interaction?: { prompt: string; onCompleteFlag: string };
-  notes?: string;
+  flag: string;
+  pos_w2: [number, number];
+  size?: number;
+  color?: string;
+  prompt?: string;
+};
+
+export type Platform = {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type LineSurface = {
+  id: string;
+  p1: [number, number];
+  p2: [number, number];
+  friction?: number;
+};
+
+export type ChallengeGate = {
+  id: string;
+  label: string;
+  flag: string;
+  gateX: number;
+  gateHeight: number;
+  requires?: string[];
+  color?: string;
 };
 
 export type SceneConfig = {
   id: string;
   title: string;
   location: { city: string; country: string; year: string };
-  skybox?: string;
-  terrain?: string;
-  music?: string;
   introText: string;
   completionText: string;
-  landmarks: Landmark[];
-  sprites?: SpriteBillboard[];
-  colliders?: BoxCollider[];
-  followers?: string[];
+  bounds: { width: number; height: number };
+  floorY: number;
+  start_w2: [number, number];
+  palette: { paper: string; ink: string; accent: string; accent2: string; wash: string };
+  platforms: Platform[];
+  surfaces?: LineSurface[];
+  boxes: MemoryBox[];
+  challenges?: ChallengeGate[];
+  followers?: ("husband" | "baby")[];
   travelTo?: string | null;
   travelRequires?: string[];
 };
 
-export type SpriteBillboard = {
-  id: string;
-  label: string;
-  emoji?: string;
-  color?: string;
-  pos_w3: [number, number, number];
-  bobAmp?: number;
-  bobFreq?: number;
-  spin?: boolean;
-};
-
-export type BoxCollider = {
-  id: string;
-  min_w3: [number, number, number];
-  max_w3: [number, number, number];
-  bounciness?: number;
-};
+const baseBounds = { width: 1500, height: 820 } as const;
 
 export const journey: SceneConfig[] = [
   {
     id: "nashville",
     title: "Vanderbilt Beginnings",
     location: { city: "Nashville", country: "USA", year: "2019" },
-    introText: "TODO: memory of med school start",
-    completionText: "TODO: wrap-up",
-    landmarks: [
-      {
-        id: "vanderbilt-hall",
-        label: "VUMC",
-        pos_w3: [5, 0, -3],
-        notes: "TODO: lecture anecdote",
-      },
-      {
-        id: "coffee",
-        label: "Coffee Spot",
-        pos_w3: [-2, 0, 4],
-        interaction: { prompt: "Share first-date story", onCompleteFlag: "coffee_done" },
-      },
+    introText: "A sketchy campus quad, a bouncing ball, and that first coffee conversation that started it all.",
+    completionText: "We promised to try—coffee, long walks, maybe forever.",
+    bounds: baseBounds,
+    floorY: 680,
+    start_w2: [90, 520],
+    palette: { paper: "#fff8ef", ink: "#131212", accent: "#f26f63", accent2: "#4a8fe2", wash: "#ffe9d2" },
+    platforms: [
+      { id: "ground", x: 0, y: 680, width: 1500, height: 18 },
+      { id: "steps-1", x: 260, y: 560, width: 210, height: 18 },
+      { id: "steps-2", x: 520, y: 500, width: 170, height: 18 },
+      { id: "library-loft", x: 860, y: 440, width: 220, height: 18 },
+      { id: "roof", x: 1200, y: 390, width: 150, height: 18 },
+    ],
+    boxes: [
+      { id: "coffee", label: "First Coffee", flag: "coffee_done", pos_w2: [340, 520], size: 60, color: "#f26f63", prompt: "Bounce here to tell that story" },
+      { id: "mentor", label: "Mentor", flag: "mentor_note", pos_w2: [620, 470], size: 54, color: "#4a8fe2" },
+      { id: "fireflies", label: "Fireflies", flag: "fireflies", pos_w2: [1010, 400], size: 52, color: "#f2c94c" },
+    ],
+    challenges: [
+      { id: "climb", label: "Bounce up the steps", flag: "nashville_climb", gateX: 1320, gateHeight: 360, requires: ["coffee_done"], color: "#f26f63" },
     ],
     travelTo: "oxford",
     travelRequires: ["coffee_done"],
-    sprites: [
-      { id: "fireflies", label: "Fireflies", emoji: "✨", color: "#ffd166", pos_w3: [1, 1.5, -1], bobAmp: 0.2, bobFreq: 1.5, spin: true },
-      { id: "mentor", label: "Mentor Spirit", emoji: "🎓", color: "#8fb6ff", pos_w3: [-3, 1.2, 2], bobAmp: 0.35, bobFreq: 1.1 },
-    ],
-    colliders: [
-      { id: "ground", min_w3: [-30, -0.2, -30], max_w3: [30, 0, 30] },
-      { id: "low-wall", min_w3: [2, 0, -6], max_w3: [8, 1.2, -5] },
-      { id: "stairs-1", min_w3: [-6, 0, 1], max_w3: [-4, 0.4, 3] },
-      { id: "stairs-2", min_w3: [-6, 0.4, 3], max_w3: [-4, 0.8, 5] },
-      { id: "stairs-3", min_w3: [-6, 0.8, 5], max_w3: [-4, 1.2, 7] },
-    ],
   },
   {
     id: "oxford",
     title: "Pandemic Oxford",
     location: { city: "Oxford", country: "UK", year: "2020" },
-    introText: "TODO: MPH + lockdown vibe",
-    completionText: "TODO",
-    landmarks: [
-      { id: "radcliffe", label: "Radcliffe Camera", pos_w3: [3, 0, -6], notes: "TODO: study walks" },
-      {
-        id: "flat",
-        label: "Tiny Flat",
-        pos_w3: [-4, 0, 2],
-        interaction: { prompt: "Cook together memory", onCompleteFlag: "flat_done" },
-      },
+    introText: "A quiet sketch of spires and rain. We biked, cooked, and learned each other's corners during lockdown.",
+    completionText: "We found rituals in storms: shared tea, Zoom birthdays, tiny triumphs.",
+    bounds: baseBounds,
+    floorY: 690,
+    start_w2: [110, 540],
+    palette: { paper: "#f2f7ff", ink: "#0f1a2c", accent: "#3c7adf", accent2: "#7ac9a3", wash: "#dce9ff" },
+    platforms: [
+      { id: "ground", x: 0, y: 690, width: 1500, height: 18 },
+      { id: "canal", x: 260, y: 580, width: 240, height: 14 },
+      { id: "college-steps", x: 620, y: 520, width: 180, height: 16 },
+      { id: "flat", x: 940, y: 470, width: 200, height: 16 },
+      { id: "spire", x: 1240, y: 400, width: 160, height: 16 },
     ],
-    travelTo: "mountain-view-1",
-    travelRequires: ["flat_done"],
-    sprites: [
-      { id: "bike", label: "Bike Rides", emoji: "🚲", color: "#9ae6b4", pos_w3: [2, 1.4, -4], bobAmp: 0.3, bobFreq: 1.4 },
-      { id: "rain", label: "Rain Memory", emoji: "🌧️", color: "#a7c7e7", pos_w3: [-2, 1.1, 3], bobAmp: 0.2, bobFreq: 0.9 },
+    boxes: [
+      { id: "bike", label: "Bike Rides", flag: "bike_done", pos_w2: [310, 530], size: 56, color: "#3c7adf" },
+      { id: "flat", label: "Tiny Flat", flag: "flat_done", pos_w2: [980, 430], size: 60, color: "#7ac9a3", prompt: "Bounce here to cook together" },
+      { id: "rain", label: "Rain Walk", flag: "rain_note", pos_w2: [1280, 360], size: 50, color: "#0f1a2c" },
     ],
-    colliders: [
-      { id: "ground", min_w3: [-30, -0.2, -30], max_w3: [30, 0, 30] },
-      { id: "college-steps", min_w3: [4, 0, -8], max_w3: [8, 0.6, -4] },
+    challenges: [
+      { id: "soak", label: "Glide through rain drops", flag: "oxford_rain", gateX: 1400, gateHeight: 340, requires: ["flat_done"], color: "#3c7adf" },
     ],
     followers: ["husband"],
+    travelTo: "mountain-view-1",
+    travelRequires: ["flat_done"],
   },
   {
     id: "mountain-view-1",
     title: "Tesla Era",
     location: { city: "Mountain View", country: "USA", year: "2021" },
-    introText: "TODO: Tesla start + interviews",
-    completionText: "TODO",
-    landmarks: [
-      { id: "tesla", label: "Tesla HQ", pos_w3: [6, 0, 1] },
-      { id: "trail", label: "Shoreline Walks", pos_w3: [-3, 0, -2], notes: "TODO: weekend strolls" },
+    introText: "California lines, late-night debug sessions, and shoreline sunsets between recruiter calls.",
+    completionText: "We chased possibility together and kept choosing us.",
+    bounds: baseBounds,
+    floorY: 700,
+    start_w2: [120, 560],
+    palette: { paper: "#fff7f2", ink: "#17100f", accent: "#e36b5f", accent2: "#8fd0ff", wash: "#ffe1d5" },
+    platforms: [
+      { id: "ground", x: 0, y: 700, width: 1500, height: 18 },
+      { id: "garage", x: 360, y: 590, width: 200, height: 16 },
+      { id: "lab", x: 720, y: 530, width: 200, height: 16 },
+      { id: "shoreline", x: 1080, y: 470, width: 200, height: 16 },
     ],
-    travelTo: "nyc",
-    travelRequires: [],
-    sprites: [
-      { id: "car", label: "Tesla Dreams", emoji: "🚗", color: "#f2b8c6", pos_w3: [0, 1.3, -3], bobAmp: 0.25, bobFreq: 1.2 },
+    boxes: [
+      { id: "tesla", label: "Tesla Badge", flag: "tesla_badge", pos_w2: [420, 550], size: 58, color: "#e36b5f" },
+      { id: "shoreline", label: "Shoreline Walk", flag: "shoreline_walk", pos_w2: [1140, 430], size: 56, color: "#8fd0ff" },
     ],
-    colliders: [
-      { id: "ground", min_w3: [-30, -0.2, -30], max_w3: [30, 0, 30] },
-      { id: "garage-wall", min_w3: [2, 0, -2], max_w3: [7, 2.2, -1] },
+    challenges: [
+      { id: "launch", label: "Hit the launch ramp", flag: "mv_launch", gateX: 1320, gateHeight: 420, requires: [], color: "#e36b5f" },
     ],
     followers: ["husband"],
+    travelTo: "nyc",
+    travelRequires: [],
   },
   {
     id: "nyc",
     title: "Upper East Side",
     location: { city: "New York", country: "USA", year: "2022" },
-    introText: "TODO: residency grind + robotics research",
-    completionText: "TODO",
-    landmarks: [
-      { id: "mount-sinai", label: "Mount Sinai", pos_w3: [5, 0, -1] },
-      {
-        id: "apartment",
-        label: "Apartment",
-        pos_w3: [-4, 0, 3],
-        interaction: { prompt: "Baby Alan arrives!", onCompleteFlag: "alan" },
-      },
-      { id: "central-park", label: "Central Park", pos_w3: [1, 0, 6] },
+    introText: "Subway cross-hatching, OR shifts, and stroller daydreams in Central Park.",
+    completionText: "We added a tiny blue circle named Alan to our sketch.",
+    bounds: baseBounds,
+    floorY: 700,
+    start_w2: [140, 560],
+    palette: { paper: "#f6f6ff", ink: "#0f1322", accent: "#ff8f65", accent2: "#5b7bff", wash: "#e1e6ff" },
+    platforms: [
+      { id: "ground", x: 0, y: 700, width: 1500, height: 18 },
+      { id: "brownstone", x: 320, y: 590, width: 200, height: 18 },
+      { id: "hospital", x: 680, y: 520, width: 240, height: 18 },
+      { id: "park", x: 1080, y: 470, width: 240, height: 18 },
     ],
-    travelTo: "mountain-view-2",
-    travelRequires: ["alan"],
-    sprites: [
-      { id: "robot", label: "Robotics Lab", emoji: "🤖", color: "#c7a5ff", pos_w3: [2, 1.6, 1], spin: true },
-      { id: "city", label: "City Lights", emoji: "🌆", color: "#ffdd99", pos_w3: [-1.5, 1.2, -2.5], bobAmp: 0.2, bobFreq: 1.3 },
+    boxes: [
+      { id: "residency", label: "Residency", flag: "residency_badge", pos_w2: [720, 480], size: 54, color: "#5b7bff" },
+      { id: "apartment", label: "Apartment", flag: "alan", pos_w2: [360, 550], size: 62, color: "#ff8f65", prompt: "Bounce here to welcome Alan" },
+      { id: "central-park", label: "Central Park", flag: "park_picnic", pos_w2: [1140, 430], size: 54, color: "#0f1322" },
     ],
-    colliders: [
-      { id: "ground", min_w3: [-30, -0.2, -30], max_w3: [30, 0, 30] },
-      { id: "hospital-wall", min_w3: [3, 0, -3], max_w3: [6, 2.5, -2] },
+    challenges: [
+      { id: "subway", label: "Catch the train", flag: "nyc_train", gateX: 1380, gateHeight: 420, requires: ["alan"], color: "#5b7bff" },
     ],
     followers: ["husband", "baby"],
+    travelTo: "mountain-view-2",
+    travelRequires: ["alan"],
   },
   {
     id: "mountain-view-2",
     title: "Homecoming & 5 Years",
     location: { city: "Mountain View", country: "USA", year: "2024" },
-    introText: "TODO: life with Alan + anniversary",
-    completionText: "TODO: closing vows",
-    landmarks: [
-      { id: "home", label: "New Home", pos_w3: [0, 0, 0], notes: "TODO: cozy detail" },
-      { id: "park", label: "Playground", pos_w3: [3, 0, -4] },
+    introText: "Back to sunshine lines and playground loops, now with a toddler orbiting us.",
+    completionText: "Five years in, the sketch is a mural.",
+    bounds: baseBounds,
+    floorY: 700,
+    start_w2: [120, 560],
+    palette: { paper: "#fff9f0", ink: "#111315", accent: "#ffb167", accent2: "#64c09c", wash: "#ffe9c2" },
+    platforms: [
+      { id: "ground", x: 0, y: 700, width: 1500, height: 18 },
+      { id: "home", x: 340, y: 590, width: 200, height: 18 },
+      { id: "playground", x: 720, y: 520, width: 220, height: 18 },
+      { id: "hill", x: 1100, y: 470, width: 220, height: 18 },
     ],
-    travelTo: null,
-    travelRequires: [],
-    sprites: [
-      { id: "family", label: "Family Joy", emoji: "👨‍👩‍👦", color: "#9ae6b4", pos_w3: [0.5, 1.2, 1], bobAmp: 0.35, bobFreq: 1.0 },
-      { id: "sunset", label: "Mountain Sunset", emoji: "🌅", color: "#ffb570", pos_w3: [-2, 1.1, -1], bobAmp: 0.25, bobFreq: 1.6 },
+    boxes: [
+      { id: "home", label: "New Home", flag: "new_home", pos_w2: [380, 550], size: 60, color: "#ffb167" },
+      { id: "swing", label: "Playground", flag: "playground", pos_w2: [780, 480], size: 58, color: "#64c09c" },
+      { id: "sunset", label: "Sunset Vows", flag: "sunset_vows", pos_w2: [1160, 430], size: 62, color: "#111315" },
     ],
-    colliders: [
-      { id: "ground", min_w3: [-30, -0.2, -30], max_w3: [30, 0, 30] },
-      { id: "courtyard-wall", min_w3: [-4, 0, -6], max_w3: [-1, 2.8, -5] },
-      { id: "garden-steps-1", min_w3: [1, 0, 2], max_w3: [3, 0.4, 4] },
-      { id: "garden-steps-2", min_w3: [1, 0.4, 4], max_w3: [3, 0.8, 6] },
+    challenges: [
+      { id: "family", label: "Keep everyone bouncing", flag: "family_loop", gateX: 1400, gateHeight: 420, requires: ["new_home", "sunset_vows"], color: "#64c09c" },
     ],
     followers: ["husband", "baby"],
+    travelTo: null,
+    travelRequires: [],
   },
 ];
